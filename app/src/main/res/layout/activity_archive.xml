@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/archive_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp">
+
+            <ImageButton
+                android:id="@+id/archive_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back"
+                android:padding="12dp"
+                app:srcCompat="@drawable/ic_archive_back"
+                app:tint="@color/secondary_text" />
+
+            <TextView
+                android:id="@+id/archive_title"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/archive_title"
+                android:textColor="@color/result"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:singleLine="true" />
+
+            <ImageButton
+                android:id="@id/clear_archive"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/clear_archive"
+                android:padding="12dp"
+                app:srcCompat="@drawable/ic_delete_history"
+                app:tint="@color/trash" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/archive_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:text="@string/archive_selection_hint"
+            android:textColor="@color/secondary_text"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/archive_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <com.kieslingdev.simpledice.ArchiveListView
+            android:id="@id/archive_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/background"
+            android:cacheColorHint="@color/background"
+            android:choiceMode="none"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:scrollbarStyle="outsideOverlay"
+            android:transcriptMode="disabled" />
+        <TextView
+            android:id="@+id/archive_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/empty_archive"
+            android:textColor="@color/secondary_text"
+            android:textSize="16sp" />
+        <View
+            android:id="@+id/archive_footer"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_gravity="bottom"
+            android:background="@color/background"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/archive_sum"
+            android:layout_width="72dp"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:textColor="@color/result"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="@drawable/selection_label"
+            android:visibility="gone" />
+        <ImageButton
+            android:id="@+id/archive_delete"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/selection_label"
+            android:contentDescription="@string/delete_selection"
+            android:padding="12dp"
+            app:srcCompat="@drawable/ic_delete_history"
+            app:tint="@color/trash"
+            android:visibility="gone" />
+    </FrameLayout>
+</LinearLayout>

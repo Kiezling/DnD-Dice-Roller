@@ -1,7 +1,8 @@
 package com.kieslingdev.simpledice
 
 import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
@@ -12,9 +13,11 @@ import android.graphics.Shader
 import android.os.Build
 import android.provider.Settings
 import android.util.AttributeSet
+import android.view.animation.LinearInterpolator
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.content.ContextCompat
 
-/** A short sweep through the glyphs, leaving the result's original gold intact. */
+/** Quiet repeating feedback, clipped to the glyphs and stopped when the result leaves view. */
 class RollResultView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : AppCompatTextView(context, attrs) {
@@ -24,6 +27,8 @@ class RollResultView @JvmOverloads constructor(
     private val glintMatrix = Matrix()
     private var glyphWidth = 0f
     private var bandWidth = 0f
+    private var pulseColor: Int? = null
+    private var pulseShader: LinearGradient? = null
 
     fun animationsEnabled(): Boolean = if (Build.VERSION.SDK_INT >= 26) {
         ValueAnimator.areAnimatorsEnabled()
@@ -31,15 +36,36 @@ class RollResultView @JvmOverloads constructor(
         Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
     }
 
-    fun showFeedback(roll: Roll) {
+    fun showFeedback(roll: Roll, shake: Boolean = true) {
         resetFeedback()
         if (!animationsEnabled()) return
         feedback = when {
-            roll.isCriticalFailure -> ObjectAnimator.ofFloat(
-                this, TRANSLATION_X, 0f, -5f * resources.displayMetrics.density,
-                5f * resources.displayMetrics.density, -3f * resources.displayMetrics.density,
-                3f * resources.displayMetrics.density, 0f
-            ).apply { duration = 280 }
+            roll.isCriticalFailure -> {
+                val pulse = ValueAnimator.ofObject(ArgbEvaluator(), currentTextColor,
+                    ContextCompat.getColor(context, R.color.critical_failure_deep)).apply {
+                    duration = 900
+                    repeatCount = ValueAnimator.INFINITE
+                    repeatMode = ValueAnimator.REVERSE
+                    addUpdateListener {
+                        setPulseColor(it.animatedValue as Int)
+                    }
+                }
+                if (shake) AnimatorSet().apply {
+                    val flashes = ValueAnimator.ofObject(ArgbEvaluator(), currentTextColor,
+                        ContextCompat.getColor(context, R.color.critical_failure_flash), currentTextColor).apply {
+                        duration = 250
+                        repeatCount = 1
+                        interpolator = LinearInterpolator()
+                        addUpdateListener { setPulseColor(it.animatedValue as Int) }
+                    }
+                    val intro = AnimatorSet().apply { playTogether(flashes, ObjectAnimator.ofFloat(
+                        this@RollResultView, TRANSLATION_X, 0f, -5f * resources.displayMetrics.density,
+                        5f * resources.displayMetrics.density, -3f * resources.displayMetrics.density,
+                        3f * resources.displayMetrics.density, 0f
+                    ).apply { duration = 280 }) }
+                    playSequentially(intro, pulse)
+                } else pulse
+            }
             roll.isCriticalSuccess -> {
                 glyphWidth = paint.measureText(text.toString())
                 bandWidth = textSize * 0.7f
@@ -48,25 +74,38 @@ class RollResultView @JvmOverloads constructor(
                     intArrayOf(currentTextColor, 0xFFFFF4CC.toInt(), currentTextColor),
                     floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP
                 )
-                ValueAnimator.ofFloat(0f, 1f).apply {
-                    duration = 480
+                val repeating = ValueAnimator.ofFloat(0f, 3f).apply {
+                    duration = 3600
+                    repeatCount = ValueAnimator.INFINITE
+                    interpolator = LinearInterpolator()
                     addUpdateListener {
-                        glint = it.animatedValue as Float
+                        glint = (it.animatedValue as Float).takeIf { progress -> progress <= 1f }
                         invalidate()
                     }
                 }
+                if (shake) AnimatorSet().apply {
+                    val intro = ValueAnimator.ofFloat(0f, 1f).apply {
+                        duration = 250
+                        repeatCount = 1
+                        interpolator = LinearInterpolator()
+                        addUpdateListener {
+                            glint = it.animatedValue as Float
+                            invalidate()
+                        }
+                    }
+                    playSequentially(intro, repeating)
+                } else repeating
             }
             else -> null
         }
-        feedback?.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                glint = null
-                glintShader = null
-                translationX = 0f
-                invalidate()
-            }
-        })
         feedback?.start()
+    }
+
+    private fun setPulseColor(color: Int) {
+        if (color == pulseColor) return
+        pulseColor = color
+        pulseShader = LinearGradient(0f, 0f, 1f, 0f, color, color, Shader.TileMode.CLAMP)
+        invalidate()
     }
 
     fun resetFeedback() {
@@ -74,12 +113,16 @@ class RollResultView @JvmOverloads constructor(
         feedback = null
         glint = null
         glintShader = null
+        pulseColor = null
+        pulseShader = null
         translationX = 0f
         paint.shader = null
         invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
+        // TextView resets paint.color during its own draw; shade only the rendered glyphs.
+        paint.shader = pulseShader
         glint?.let { progress ->
             val contentWidth = width - compoundPaddingLeft - compoundPaddingRight
             val left = (contentWidth - glyphWidth) / 2f - bandWidth

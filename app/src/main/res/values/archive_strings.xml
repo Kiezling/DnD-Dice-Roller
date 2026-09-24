@@ -1,0 +1,6 @@
+<resources>
+    <string name="archive_title">Full Roll History</string>
+    <string name="archive_selection_hint">Tap rows to select a range. Drag on results to extend; swipe timestamps to scroll.</string>
+    <string name="archive_row_description">D%1$d: %2$d, %3$s</string>
+    <string name="back">Back</string>
+</resources>

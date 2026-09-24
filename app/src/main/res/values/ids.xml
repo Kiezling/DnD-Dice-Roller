@@ -1,0 +1,12 @@
+<resources>
+    <item name="dark_mode" type="id" />
+    <item name="settings_title" type="id" />
+    <item name="duration_label" type="id" />
+    <item name="duration_hint" type="id" />
+    <item name="selection_sum" type="id" />
+    <item name="delete_selection" type="id" />
+    <item name="archive_list" type="id" />
+    <item name="clear_archive" type="id" />
+    <item name="roll_modes" type="id" />
+    <item name="roll_duration" type="id" />
+</resources>

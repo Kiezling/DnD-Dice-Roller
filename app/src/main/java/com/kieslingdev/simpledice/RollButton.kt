@@ -10,6 +10,7 @@ class RollButton @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : AppCompatButton(context, attrs) {
     var onHoldChanged: ((Boolean) -> Unit)? = null
+    var holdEnabled = true
     private var holding = false
     private var touchActive = false
     private var gestureCanceled = false
@@ -18,14 +19,18 @@ class RollButton @JvmOverloads constructor(
         // We provide one light haptic when the result commits, not a second long-press pulse.
         isHapticFeedbackEnabled = false
         setOnLongClickListener {
-            if (touchActive && isPressed && !gestureCanceled) {
-                holding = true
-                onHoldChanged?.invoke(true)
-            } else if (!touchActive) {
-                // Accessibility and keyboard long-clicks have no touch release to await.
-                performClick()
+            if (!holdEnabled) {
+                false
+            } else {
+                if (touchActive && isPressed && !gestureCanceled) {
+                    holding = true
+                    onHoldChanged?.invoke(true)
+                } else if (!touchActive) {
+                    // Accessibility and keyboard long-clicks have no touch release to await.
+                    performClick()
+                }
+                true
             }
-            true
         }
     }
 
