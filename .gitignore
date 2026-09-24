@@ -1,0 +1,19 @@
+.gradle/
+.kotlin/
+.idea/
+**/build/
+local.properties
+.recovery/
+.tools/
+*.jks
+*.keystore
+# Local agent state and release credentials
+PROJECT_STATE.md
+keystore.properties
+signing.properties
+*.pepk
+*.p12
+*.pfx
+*.pem
+.env
+.env.*

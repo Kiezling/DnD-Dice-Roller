@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">DnD Dice Roller</string>
+    <string name="roll">Roll</string>
+    <string name="clear_history">Clear rolls and history</string>
+    <string name="number">%1$d</string>
+    <string name="die_label">D%1$d</string>
+    <string name="select_die">Select D%1$d</string>
+    <string name="selected_die">Die size: D%1$d</string>
+    <string name="roll_die">Roll D%1$d</string>
+    <string name="roll_result">D%1$d: %2$d</string>
+    <string name="no_rolls">No rolls yet</string>
+    <string name="history_entry">D%1$d: %2$d. Total including newer rolls: %3$d</string>
+    <string name="header_die">Die</string>
+    <string name="header_history">History</string>
+    <string name="header_total">Total</string>
+    <string name="total_explanation">Total of this roll, all newer rolls, and the current roll</string>
+    <string name="hold_to_roll">Hold to scramble; release to roll</string>
+    <string name="rolling_die">Rolling D%1$d</string>
+</resources>
