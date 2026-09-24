@@ -17,11 +17,17 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.Before
 import org.junit.runner.RunWith
 import kotlin.random.Random
 
 @RunWith(AndroidJUnit4::class)
 class RollInteractionTest {
+    @Before fun resetSavedState() {
+        DiceStore(androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext).use {
+            it.clearAll(); it.saveSelectedDie(20); it.saveSettings(RollSettings())
+        }
+    }
     private class FixedRandom(var value: Int = 1) : Random() {
         var calls = 0
         override fun nextBits(bitCount: Int): Int = error("Unexpected random call")
@@ -202,11 +208,10 @@ class RollInteractionTest {
             SystemClock.sleep(200)
         }
     }
-    @Test fun maximumGlintsInsideTheNumeralThenReturnsToUnchangedGold() {
+    @Test fun maximumGoldGlintRepeatsAfterTheFirstCycle() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             lateinit var baseline: Bitmap
-            lateinit var highlighted: Bitmap
-            lateinit var settled: Bitmap
+            val repeatedFrames = mutableListOf<Bitmap>()
             fun capture(activity: MainActivity): Bitmap {
                 val view = activity.findViewById<RollResultView>(R.id.result)
                 return Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888).also {
@@ -219,21 +224,57 @@ class RollInteractionTest {
             }
             SystemClock.sleep(650)
             scenario.onActivity {
+                it.findViewById<RollResultView>(R.id.result).resetFeedback()
                 baseline = capture(it)
                 it.findViewById<View>(R.id.roll_button).performClick()
             }
-            SystemClock.sleep(240)
-            scenario.onActivity { highlighted = capture(it) }
-            SystemClock.sleep(400)
-            scenario.onActivity {
-                settled = capture(it)
-                assertResult(it, "20", R.color.critical_success)
+            // The glint starts again after its 1200 ms sweep and 2400 ms pause.
+            // Sample a broad interval so scheduling jitter cannot miss the sweep.
+            SystemClock.sleep(3550)
+            repeat(10) {
+                scenario.onActivity { repeatedFrames += capture(it) }
+                SystemClock.sleep(100)
             }
-            assertFalse("Glint must visibly cross the text", baseline.sameAs(highlighted))
-            assertTrue("The settled gold must be unchanged", baseline.sameAs(settled))
+            scenario.onActivity { assertResult(it, "20", R.color.critical_success) }
+            assertTrue("Gold glint must appear again after its first cycle",
+                repeatedFrames.any { !baseline.sameAs(it) })
             baseline.recycle()
-            highlighted.recycle()
-            settled.recycle()
+            repeatedFrames.forEach(Bitmap::recycle)
+        }
+    }
+
+    @Test fun criticalFailurePulsesAfterShakeAndResetRestoresItsBaseDrawing() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            lateinit var baseline: Bitmap
+            lateinit var pulsing: Bitmap
+            lateinit var reset: Bitmap
+            fun capture(activity: MainActivity): Bitmap {
+                val view = activity.findViewById<RollResultView>(R.id.result)
+                return Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888).also {
+                    view.draw(Canvas(it))
+                }
+            }
+            scenario.onActivity {
+                val view = it.findViewById<RollResultView>(R.id.result)
+                view.text = "1"
+                view.setTextColor(ContextCompat.getColor(it, R.color.critical_failure))
+                view.resetFeedback()
+                baseline = capture(it)
+                view.showFeedback(Roll(20, 1))
+            }
+            SystemClock.sleep(700)
+            scenario.onActivity {
+                val view = it.findViewById<RollResultView>(R.id.result)
+                assertEquals(ContextCompat.getColor(it, R.color.critical_failure), view.currentTextColor)
+                pulsing = capture(it)
+                view.resetFeedback()
+                reset = capture(it)
+            }
+            assertFalse("Critical failure drawing must change after the shake", baseline.sameAs(pulsing))
+            assertTrue("Reset must restore the base critical failure drawing", baseline.sameAs(reset))
+            baseline.recycle()
+            pulsing.recycle()
+            reset.recycle()
         }
     }
     private fun touch(activity: MainActivity, down: Long, action: Int, outside: Boolean = false) {
@@ -253,9 +294,9 @@ class RollInteractionTest {
     private fun assertHistoryColors(activity: MainActivity) {
         val rows = visibleRows(activity)
         assertEquals(2, rows.size)
-        assertEquals(ContextCompat.getColor(activity, R.color.critical_failure),
+        assertEquals(ContextCompat.getColor(activity, R.color.history_result),
             rows[0].findViewById<TextView>(R.id.value).currentTextColor)
-        assertEquals(ContextCompat.getColor(activity, R.color.critical_success),
+        assertEquals(ContextCompat.getColor(activity, R.color.history_result),
             rows[1].findViewById<TextView>(R.id.value).currentTextColor)
     }
 

@@ -1,0 +1,18 @@
+<resources>
+    <color name="background">#17191B</color>
+    <color name="result">#F0F0F0</color>
+    <color name="history_result">#D6D8DA</color>
+    <color name="secondary_text">#B8BEC3</color>
+    <color name="roll_button">@color/goldenrod</color>
+    <color name="accent">@color/goldenrod</color>
+    <color name="trash">#FFFFFF</color>
+    <color name="critical_failure_flash">#FFD0D0</color>
+    <color name="critical_failure_deep">#A34660</color>
+    <color name="critical_success">@color/goldenrod</color>
+    <color name="critical_failure">#FF8888</color>
+    <color name="divider">#484D52</color>
+    <color name="header_text">#B8BEC3</color>
+    <color name="selection_fill">#302D23</color>
+    <color name="selection_border">@color/goldenrod</color>
+    <color name="selection_label">#302D23</color>
+</resources>

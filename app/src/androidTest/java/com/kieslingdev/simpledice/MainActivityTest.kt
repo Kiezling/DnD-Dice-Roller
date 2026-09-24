@@ -8,10 +8,16 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.Before
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
+    @Before fun resetSavedState() {
+        DiceStore(androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext).use {
+            it.clearAll(); it.saveSelectedDie(20); it.saveSettings(RollSettings())
+        }
+    }
     @Test fun choicesRollHistoryAndClearWorkTogether() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->

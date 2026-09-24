@@ -1,7 +1,12 @@
 # Play Store release
 
 Release publication is separate from building the app or merging a pull request.
-As of September 23, 2026, version **1.1 / code 4** is built and signed locally.
+Version **1.1 / code 4** remains the proposed Play release. The current September
+24 source includes persistent history, dark mode, Goldenrod controls, updated
+feedback, and offline SecureRandom. Its release APK and bundle build unsigned;
+the earlier signed artifacts predate these changes and must not be uploaded.
+
+An earlier version was built and signed locally on September 23, 2026.
 The owner submitted an upload-key reset request, which Google Play reports as
 pending. A production draft with release notes is saved, but the bundle has not
 been uploaded and the release has not been submitted for review.
@@ -40,11 +45,11 @@ signed. Signing must be configured and independently verified.
 
 ## Proposed release notes
 
-Updated for modern Android devices. Added clearer history labels, a last-rolled
-die indicator, and a new clear-history button. Ones now appear in red and maximum
-rolls in gold for every die, with subtle animations. Hold Roll to scramble, then
-release to roll. Includes light haptics, persistent history colors, and improved
-landscape and accessibility support.
+Save and browse your complete roll history with timestamps, range selection,
+subtotals, and selective deletion. Choose instant or timed rolls and dark mode
+from the new hamburger menu. Goldenrod controls and updated maximum/one animations
+make results easy to spot. Rolls use secure, entirely offline randomness. Includes
+light haptics, hold-to-animate, and improved landscape and large-text layouts.
 
 ## References
 

@@ -1,10 +1,17 @@
 package com.kieslingdev.simpledice
 
 import kotlin.random.Random
+import kotlin.random.asJavaRandom
 import org.junit.Assert.*
 import org.junit.Test
 
 class DiceStateTest {
+    @Test fun `production randomness uses device seeded SecureRandom and valid bounded faces`() {
+        assertTrue(diceRandom.asJavaRandom() is java.security.SecureRandom)
+        for (sides in DICE) {
+            repeat(100) { assertTrue(DiceState(sides).roll().current!!.value in 1..sides) }
+        }
+    }
     @Test fun `starts with D20 and no results`() {
         val state = DiceState()
         assertEquals(20, state.selectedDie)
@@ -23,7 +30,11 @@ class DiceStateTest {
                         return value
                     }
                 }
-                assertEquals(Roll(sides, value), DiceState(sides).roll(random).current)
+                val result = DiceState(sides).roll(random, timestamp = 1234L).current!!
+                assertEquals(sides, result.sides)
+                assertEquals(value, result.value)
+                assertEquals(1234L, result.timestamp)
+                assertTrue(result.id > 0L)
             }
         }
     }
@@ -70,8 +81,50 @@ class DiceStateTest {
 
     @Test fun `clear removes results and totals but preserves selection`() {
         val cleared = DiceState(100, listOf(Roll(100, 50), Roll(6, 4))).clear()
-        assertEquals(DiceState(100), cleared)
+        assertEquals(100, cleared.selectedDie)
+        assertTrue(cleared.rolls.isEmpty())
+        assertEquals(2, cleared.archive.size)
         assertTrue(cleared.roll(Random(4)).history.isEmpty())
+    }
+
+    @Test fun `rolls stay in recent history and archive after more than eleven rolls`() {
+        var state = DiceState()
+        repeat(15) { index -> state = state.roll(Random(index), timestamp = index.toLong()) }
+
+        assertEquals(11, state.rolls.size)
+        assertEquals(15, state.archive.size)
+        assertEquals(state.archive.take(11), state.rolls)
+        assertEquals(15, state.archive.map { it.id }.toSet().size)
+    }
+
+    @Test fun `clear recent preserves archive and clear all deletes both lists`() {
+        val filled = DiceState().roll(Random(1), 10L).roll(Random(2), 20L)
+        val clearedRecent = filled.clearRecent()
+
+        assertTrue(clearedRecent.rolls.isEmpty())
+        assertEquals(filled.archive, clearedRecent.archive)
+        assertEquals(emptyList<Roll>(), clearedRecent.clearAll().archive)
+    }
+
+    @Test fun `deleting selected recent rolls does not promote older hidden archive entries`() {
+        var state = DiceState()
+        repeat(13) { index -> state = state.roll(Random(index), timestamp = index.toLong()) }
+        val hidden = state.archive.last()
+        val delete = state.rolls.first().id
+
+        val deleted = state.deleteRolls(setOf(delete))
+
+        assertEquals(10, deleted.rolls.size)
+        assertFalse(deleted.archive.any { it.id == delete })
+        assertTrue(deleted.archive.any { it.id == hidden.id })
+        assertEquals(state.archive.size - 1, deleted.archive.size)
+    }
+
+    @Test fun `roll settings support half second steps from half a second through five seconds`() {
+        assertEquals(500L, RollSettings(RollMode.TIMED, 1).durationMillis)
+        assertEquals(5000L, RollSettings(RollMode.TIMED, 10).durationMillis)
+        assertThrows(IllegalArgumentException::class.java) { RollSettings(durationSteps = 0) }
+        assertThrows(IllegalArgumentException::class.java) { RollSettings(durationSteps = 11) }
     }
 
     @Test fun `every die highlights one and its maximum`() {

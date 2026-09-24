@@ -8,22 +8,53 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1">
+    <ImageButton
+        android:id="@+id/menu_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="4dp"
+        android:padding="12dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/menu"
+        app:srcCompat="@drawable/ic_menu"
+        app:tint="@color/header_text" />
     <LinearLayout
-        android:id="@+id/history_headers"
+        android:id="@+id/history_headers" android:layout_below="@id/menu_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingTop="8dp"
+        android:gravity="center_vertical" android:paddingTop="4dp"
         android:paddingBottom="8dp">
         <TextView
             style="@style/HistoryHeader"
             android:text="@string/header_die" />
-        <TextView
-            style="@style/HistoryHeader"
-            android:gravity="center"
-            android:text="@string/header_history" />
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/history_button"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:background="@drawable/header_button"
+                android:backgroundTint="@null"
+                android:stateListAnimator="@null"
+                android:elevation="0dp"
+                android:minWidth="64dp"
+                android:minHeight="0dp" android:paddingTop="0dp" android:paddingBottom="0dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textAllCaps="false"
+                android:textStyle="normal"
+                android:textSize="12sp"
+                android:textColor="@color/header_text"
+                android:gravity="center"
+                android:text="@string/header_history" />
+        </FrameLayout>
         <TextView
             style="@style/HistoryHeader"
             android:gravity="end"
@@ -38,16 +69,17 @@
         android:layout_below="@id/history_headers"
         android:layout_alignParentBottom="true"
         android:fillViewport="true">
+        <com.kieslingdev.simpledice.SelectionHistoryView android:id="@+id/history_selection" android:layout_width="match_parent" android:layout_height="wrap_content">
         <LinearLayout
             android:id="@+id/history_rows"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:gravity="bottom"
             android:orientation="vertical"
             android:paddingStart="16dp"
             android:paddingEnd="16dp" />
+        </com.kieslingdev.simpledice.SelectionHistoryView>
     </ScrollView>
-
     </RelativeLayout>
     <View
         android:layout_width="1dp"
@@ -100,7 +132,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/clear_history"
             app:srcCompat="@drawable/ic_delete_history"
-            app:tint="@color/secondary_text" />
+            app:tint="@color/trash" />
     </FrameLayout>
 
     <com.kieslingdev.simpledice.RollButton
@@ -111,7 +143,7 @@
         app:backgroundTint="@color/roll_button"
         android:text="@string/roll"
         android:textAllCaps="false"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/black"
         android:textSize="26sp"
         android:textStyle="bold" />
 

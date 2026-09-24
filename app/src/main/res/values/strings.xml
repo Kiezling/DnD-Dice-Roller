@@ -1,7 +1,20 @@
 <resources>
     <string name="app_name">DnD Dice Roller</string>
     <string name="roll">Roll</string>
-    <string name="clear_history">Clear rolls and history</string>
+    <string name="clear_history">Clear recent rolls (keep full history)</string>
+    <string name="menu">Menu</string>
+    <string name="roll_settings">Menu</string>
+    <string name="instant_roll">Instant Roll (hold to animate)</string>
+    <string name="timed_roll">Animate on tap</string>
+    <string name="duration">Animation: %1$.1f seconds</string>
+    <string name="duration_hint">Choose 0.5–5 seconds, in half-second steps.</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="empty_archive">No saved rolls yet</string>
+    <string name="clear_archive">Delete entire roll history</string>
+    <string name="confirm_clear_archive">Delete all saved rolls, including recent rolls? This cannot be undone.</string>
+    <string name="delete_all">Delete all</string>
+    <string name="delete_selection">Delete selected rolls</string>
+    <string name="selection_total">Selected sum: %1$s</string>
     <string name="number">%1$d</string>
     <string name="die_label">D%1$d</string>
     <string name="select_die">Select D%1$d</string>
